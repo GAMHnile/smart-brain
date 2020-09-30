@@ -39,7 +39,9 @@ const initialState = {
     name: '',
     email: '',
     entries: 0,
-    joined: ''
+    joined: '',
+    age: '',
+    pet: ''
   }
 }
 
@@ -59,6 +61,23 @@ class App extends Component {
         joined: data.joined
       }
     })
+  }
+
+  componentDidMount(){
+    const token = window.sessionStorage.getItem("token");
+    if(token){
+      fetch("http://localhost:3500/signin",{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        }
+      }).ther(resp=>resp.json())
+      .then(data=>{
+        console.log({data, message: "get the user data"})
+      })
+      .catch(console.log);
+    }
   }
 
   calculateFaceLocation = (data) => {
@@ -135,7 +154,7 @@ class App extends Component {
   }
 
   render() {
-    const { isSignedIn, imageUrl, route, boxes, isProfileOpen } = this.state;
+    const { isSignedIn, imageUrl, route, boxes, isProfileOpen, user } = this.state;
     return (
       <div className="App">
         <Particles className='particles'
@@ -144,7 +163,7 @@ class App extends Component {
         <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} toggleModal={this.toggleModal}  />
         {isProfileOpen &&
           <Modal>
-            <Profile isProfileOpen={isProfileOpen} toggleModal={this.toggleModal} />
+            <Profile isProfileOpen={isProfileOpen} toggleModal={this.toggleModal} user={user} loadUser={this.loadUser} />
           </Modal>}
         { route === 'home'
           ? <div>
