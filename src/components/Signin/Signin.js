@@ -31,7 +31,7 @@ class Signin extends React.Component {
       .then(response => response.json())
       .then(data => {
         if (data.userId && data.token) {
-          window.sessionStorage.setItem("token", data.token);
+          window.sessionStorage.setItem("token", data.token);  
           this.props.loadUser(data)
           this.props.onRouteChange('home');
         }
