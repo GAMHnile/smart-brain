@@ -19,12 +19,17 @@ class Profile extends React.Component {
     onFormSubmit = (data) => {
         fetch(`http://localhost:3500/profile/${this.props.user.id}`,{
                 method: 'PUT',
-                headers: {"Content-type": "application/json"},
+                headers: {
+                    'Content-Type': 'application/json',
+                    "Authorization": window.sessionStorage.getItem("token")
+                  },
                 body: JSON.stringify({formInput: data})
-            }).then(res => res.json())
+            })
             .then(res => {
-                this.props.loadUser({ ...this.props.user, ...this.state });
-                this.props.toggleModal();
+                if(res.status === 200 || res.status === 304){
+                    this.props.loadUser({ ...this.props.user, ...this.state });
+                    this.props.toggleModal();
+                }
             })
             .catch(console.log);
     }

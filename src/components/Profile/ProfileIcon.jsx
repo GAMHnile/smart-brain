@@ -5,7 +5,17 @@ import { Dropdown, DropdownMenu, DropdownToggle, DropdownItem } from 'reactstrap
 const ProfileIcon = ({onRouteChange, toggleModal}) => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const toggle = () => setDropdownOpen(prevState => !prevState);
-
+    const signOutHandler = () =>{
+        fetch("http://localhost:3500/signout",{
+            method: "DELETE",
+            headers: {"Authorization": window.sessionStorage.getItem("token")}
+        })
+        .then(res=>{
+            window.sessionStorage.removeItem("token");
+        })
+        .catch(err=> window.sessionStorage.removeItem("token"))
+        onRouteChange('signout');
+    }
 
     return (
         <div className="pa4 tc">
@@ -25,7 +35,7 @@ const ProfileIcon = ({onRouteChange, toggleModal}) => {
                 right={true}
                 >
                     <DropdownItem  onClick={toggleModal}>View Profile</DropdownItem>
-                    <DropdownItem onClick={()=>onRouteChange('signout')}>Sign Out</DropdownItem>
+                    <DropdownItem onClick={signOutHandler}>Sign Out</DropdownItem>
                 </DropdownMenu>
             </Dropdown>
         </div>

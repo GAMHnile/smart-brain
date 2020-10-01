@@ -72,9 +72,25 @@ class App extends Component {
           "Content-Type": "application/json",
           "Authorization": token
         }
-      }).ther(resp=>resp.json())
+      }).then(resp=>resp.json())
       .then(data=>{
-        console.log({data, message: "get the user data"})
+        if(data && data.id){
+          fetch(`http://localhost:3500/profile/${data.id}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": token
+            } 
+          })
+          .then(resp=>resp.json())
+          .then(user =>{
+            if(user && user.email){
+              this.loadUser(user);
+              this.onRouteChange("home");
+            }
+          })
+        }
+        
       })
       .catch(console.log);
     }
@@ -82,24 +98,29 @@ class App extends Component {
 
   calculateFaceLocation = (data) => {
     //const clarifaiFace1 = data.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById('inputimage');
-    const width = Number(image.width);
-    const height = Number(image.height);
-
-    const faceBoxes = data.outputs[0].data.regions.map(region => {
-      const box = region.region_info.bounding_box
-      return ({
-        leftCol: box.left_col * width,
-        topRow: box.top_row * height,
-        rightCol: width - (box.right_col * width),
-        bottomRow: height - (box.bottom_row * height)
+    if(data.outputs){
+      const image = document.getElementById('inputimage');
+      const width = Number(image.width);
+      const height = Number(image.height);
+  
+      const faceBoxes = data.outputs[0].data.regions.map(region => {
+        const box = region.region_info.bounding_box
+        return ({
+          leftCol: box.left_col * width,
+          topRow: box.top_row * height,
+          rightCol: width - (box.right_col * width),
+          bottomRow: height - (box.bottom_row * height)
+        })
       })
-    })
-    return faceBoxes;
+      return faceBoxes;
+    }
+    return 
   }
 
   displayFaceBox = (boxes) => {
-    this.setState({ boxes });
+    if(boxes){
+      this.setState({ boxes });
+    }
   }
 
   onInputChange = (event) => {
@@ -110,7 +131,10 @@ class App extends Component {
     this.setState({ imageUrl: this.state.input });
     fetch('http://localhost:3500/imageurl', {
       method: 'post',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        "Authorization": window.sessionStorage.getItem("token")
+      },
       body: JSON.stringify({
         input: this.state.input
       })
@@ -120,7 +144,10 @@ class App extends Component {
         if (response) {
           fetch('http://localhost:3500/image', {
             method: 'put',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json', 
+              "Authorization": window.sessionStorage.getItem("token")
+            },
             body: JSON.stringify({
               id: this.state.user.id
             })

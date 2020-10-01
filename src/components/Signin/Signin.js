@@ -31,9 +31,23 @@ class Signin extends React.Component {
       .then(response => response.json())
       .then(data => {
         if (data.userId && data.token) {
-          window.sessionStorage.setItem("token", data.token);  
-          this.props.loadUser(data)
-          this.props.onRouteChange('home');
+          window.sessionStorage.setItem("token", data.token); 
+          
+          
+          fetch(`http://localhost:3500/profile/${data.userId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": data.token
+            } 
+          })
+          .then(resp=>resp.json())
+          .then(user =>{
+            if(user && user.email){
+              this.props.loadUser(user);
+              this.props.onRouteChange("home");
+            }
+          })
         }
       })
   }
